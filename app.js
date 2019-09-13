@@ -9,7 +9,7 @@ GAME RULES:
 
 */
 
-let scores, roundScore, activePlayer, dice, gamePlaying,prevDice;
+let scores, roundScore, activePlayer, dice1, dice2, gamePlaying, winningScore;
 
 init();
 
@@ -18,30 +18,30 @@ document.querySelector(".btn-roll").addEventListener("click", () => {
   //Do something here
   if (gamePlaying) {
     //1. A random number
-    dice = Math.floor(Math.random() * 6) + 1;
+    dice1 = Math.floor(Math.random() * 6) + 1;
+    dice2 = Math.floor(Math.random() * 6) + 1;
+
     // 2. Display the result
-    let diceDom = document.querySelector(".dice");
-    diceDom.style.display = "block";
-    diceDom.src = "dice-" + dice + ".png";
+    let diceDom = document.getElementsByClassName("dice");
+    diceDom[0].style.display = "block";
+    diceDom[0].src = "dice-" + dice1 + ".png";
+    diceDom[1].style.display = "block";
+    diceDom[1].src = "dice-" + dice2 + ".png";
+
 
     //3. Update the round score IF the rolled number was NOT 1
-    if (dice !== 1 && (prevDice !==6 || dice !== 6)) {
-      console.log(`PrevDice: ${prevDice}, CurrentDice: ${dice}`);
-
+    if (dice1 !== 1 && dice2 !== 1) {
       //Add score
-      roundScore += dice;
+      roundScore += dice1 + dice2;
       document.querySelector("#current-" + activePlayer).textContent = roundScore;
     } else {
       //Next player
-      if (prevDice === 6 && dice === 6){
+      if (prevDice === 6 && dice1 === 6) {
         scores[activePlayer] = 0;
         document.querySelector("#score-" + activePlayer).textContent = scores[activePlayer];
       }
-      console.log(`PrevDice: ${prevDice}, CurrentDice: ${dice}`);
       nextPlayer();
     }
-    prevDice = dice;
-
   }
 });
 
@@ -51,19 +51,14 @@ document.querySelector(".btn-hold").addEventListener("click", () => {
     scores[activePlayer] += roundScore;
 
     //Update the UI
-    document.querySelector("#score-" + activePlayer).textContent =
-      scores[activePlayer];
+    document.querySelector("#score-" + activePlayer).textContent = scores[activePlayer];
 
     //Check if player won the game
-    if (scores[activePlayer] >= 20) {
+    if (scores[activePlayer] >= winningScore) {
       document.querySelector("#name-" + activePlayer).textContent = "Winner";
-      document.querySelector(".dice").style.display = "none";
-      document
-        .querySelector(".player-" + activePlayer + "-panel")
-        .classList.add("winner");
-      document
-        .querySelector(".player-" + activePlayer + "-panel")
-        .classList.remove("active");
+      removeDiceImage();
+      document.querySelector(".player-" + activePlayer + "-panel").classList.add("winner");
+      document.querySelector(".player-" + activePlayer + "-panel").classList.remove("active");
       gamePlaying = false;
     } else {
       //Next Player
@@ -80,8 +75,7 @@ function nextPlayer() {
 
   document.querySelector(".player-0-panel").classList.toggle("active");
   document.querySelector(".player-1-panel").classList.toggle("active");
-
-  document.querySelector(".dice").style.display = "none";
+  removeDiceImage();
 }
 
 document.querySelector(".btn-new").addEventListener("click", init);
@@ -90,8 +84,23 @@ function init() {
   scores = [0, 0];
   activePlayer = 0;
   roundScore = 0;
-  gamePlaying = true;
   prevDice = undefined;
+  document.querySelector('.winning-score-div').style.display = "block";
+  removeDiceImage();
+
+
+  document.querySelector('input').value = "";
+
+  document.querySelector('input').addEventListener('keydown', (e) => {
+    if (e.keyCode == 13) {
+      winningScore = document.querySelector('input').value;
+      document.querySelector('.winning-score-div').style.display = "none";
+      gamePlaying = true;
+
+    }
+  });
+
+
   document.querySelector(".dice").style.display = "none";
 
   document.getElementById("score-0").textContent = "0";
@@ -107,4 +116,10 @@ function init() {
   document.querySelector(".player-0-panel").classList.remove("active");
   document.querySelector(".player-1-panel").classList.remove("active");
   document.querySelector(".player-0-panel").classList.add("active");
+
+}
+
+function removeDiceImage() {
+  document.getElementsByClassName("dice")[0].style.display = "none";
+  document.getElementsByClassName("dice")[1].style.display = "none";
 }
